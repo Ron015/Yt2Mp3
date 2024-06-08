@@ -44,7 +44,7 @@ app.get('/:youtubeUrl/play.mp3', async (req, res) => {
     await convertToMP3(tempAudioPath, outputMP3Path);
 
     // Serve the HTML page with player
-    res.redirect('/public/' + uniqueId + '.mp3')
+    res.send('/public/' + uniqueId + '.mp3')
 
     // Cleanup temp files after sending response
     setTimeout(() => {
