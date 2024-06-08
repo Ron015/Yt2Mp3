@@ -44,16 +44,7 @@ app.get('/:youtubeUrl/play.mp3', async (req, res) => {
     await convertToMP3(tempAudioPath, outputMP3Path);
 
     // Serve the HTML page with player
-    res.send(`
-      <html>
-      <body>
-        <audio controls autoplay>
-          <source src="/public/output_${uniqueId}.mp3" type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
-      </body>
-      </html>
-    `);
+    res.redirect('/public/' + uniqueId + '.mp3')
 
     // Cleanup temp files after sending response
     setTimeout(() => {
