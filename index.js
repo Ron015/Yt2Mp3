@@ -31,30 +31,40 @@ async function convertToMP3(inputPath, outputPath) {
   });
 }
 
-// API endpoint to convert YouTube audio to MP3 and show player
+// API endpoint to convert YouTube audio to MP3 and serve for playback
 app.get('/:youtubeUrl/play.mp3', async (req, res) => {
   const youtubeUrl = `https://www.youtube.com/watch?v=${req.params.youtubeUrl}`;
 
   try {
     const uniqueId = Date.now(); // Generate a unique ID based on the current timestamp
     const tempAudioPath = path.join(__dirname, `temp_${uniqueId}.mp4`); // Temporarily store downloaded audio
-    const outputMP3Path = path.join(__dirname, `public`, `output_${uniqueId}.mp3`); // Converted MP3 file path in public directory
+    const outputMP3Path = path.join(__dirname, `music`, `output_${uniqueId}.mp3`); // Converted MP3 file path in public directory
 
     await downloadAudio(youtubeUrl, tempAudioPath);
     await convertToMP3(tempAudioPath, outputMP3Path);
 
-    // Serve the HTML page with player
-    res.send('/public/' + uniqueId + '.mp3')
+    // Serve the MP3 file for playback
+    const filePath = path.join(__dirname, `music`, `output_${uniqueId}.mp3`);
+
+    // Set headers for streaming audio
+    res.set({
+      'Content-Type': 'audio/mpeg',  // Set the content type based on your file type
+    });
+
+    // Stream the file directly to the response
+    const stream = fs.createReadStream(filePath);
+    stream.pipe(res);
 
     // Cleanup temp files after sending response
-    setTimeout(() => {
+    stream.on('end', () => {
       if (fs.existsSync(tempAudioPath)) {
         fs.unlinkSync(tempAudioPath);
       }
       if (fs.existsSync(outputMP3Path)) {
         fs.unlinkSync(outputMP3Path);
       }
-    }, 60000); // Delete after 60 seconds to ensure file is served
+    });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
@@ -70,7 +80,7 @@ app.get('/:youtubeUrl/play.mp3', async (req, res) => {
 });
 
 // Serve MP3 files statically
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/music', express.static(path.join(__dirname, 'music')));
 
 // Start the server
 const PORT = process.env.PORT || 3000;
