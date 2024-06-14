@@ -46,7 +46,7 @@ app.get('/:youtubeUrl/play.mp3', async (req, res) => {
     // Serve the MP3 file for playback
     const filePath = path.join(__dirname, `music`, `output_${uniqueId}.mp3`);
 
-    // Set headers for streaming audio
+    // Set headers for streaming audio mp3
     res.set({
       'Content-Type': 'audio/mpeg',  // Set the content type based on your file type
     });
